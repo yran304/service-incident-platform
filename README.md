@@ -8,7 +8,7 @@ Planning and foundation setup.
 
 ## Planned capabilities
 
-- Role-based user access: administrator, editor, and viewer
+- Role-based access: administrator, editor, and viewer
 - Organization and service management
 - Incident lifecycle: investigating, identified, monitoring, and resolved
 - Internal dashboard for managing incidents
@@ -24,5 +24,12 @@ Planning and foundation setup.
 
 ## Architecture
 
-```text
 React frontend → Spring Boot REST API → PostgreSQL
+
+## Development roadmap
+
+1. Foundation: backend, frontend, and database start locally.
+2. Core service and incident APIs.
+3. Authentication and role-based authorization.
+4. Internal dashboard and public status page.
+5. Tests, Docker Compose, CI, and API documentation.
