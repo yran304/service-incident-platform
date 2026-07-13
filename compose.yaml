@@ -1,0 +1,19 @@
+services: # what services do we run, Docker compose read this
+  postgres: # PostgreSQL, it configures how to start PostgreSQL
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: incident_platform
+      POSTGRES_USER: incident_app
+      POSTGRES_PASSWORD: incident_app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U incident_app -d incident_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes: # where do we keep the data
+  postgres-data:

@@ -4,7 +4,8 @@ A full-stack application that enables organizations to manage service incidents 
 
 ## Project status
 
-Planning and foundation setup.
+Foundation complete. The React frontend, Spring Boot backend, PostgreSQL database,
+and Flyway migrations run locally. Core product features are in development.
 
 ## Planned capabilities
 
@@ -25,6 +26,47 @@ Planning and foundation setup.
 ## Architecture
 
 React frontend → Spring Boot REST API → PostgreSQL
+
+## Run locally
+
+### Prerequisites
+
+- Java 21
+- Node.js 20.19 or later
+- Docker Desktop
+
+Start PostgreSQL from the repository root:
+
+```bash
+docker compose up -d postgres
+```
+
+Start the backend in a second terminal:
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+The backend health endpoint is available at <http://localhost:8080/actuator/health>.
+
+Start the frontend in another terminal:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open the URL printed by Vite, normally <http://localhost:5173>.
+
+## Run backend tests
+
+PostgreSQL must be running first. Then run:
+
+```bash
+cd backend
+./gradlew test
+```
 
 ## Development roadmap
 
