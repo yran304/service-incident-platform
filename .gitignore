@@ -3,3 +3,6 @@ Service_Incident_Platform_Project_Blueprint.docx
 
 # Temporary Microsoft Office lock files
 ~$*
+
+# Local VS Code workspace settings
+.vscode/

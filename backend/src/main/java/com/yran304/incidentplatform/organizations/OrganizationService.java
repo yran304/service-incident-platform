@@ -18,7 +18,7 @@ public class OrganizationService { // higher-level business logic. It uses the r
 
     public OrganizationResponse createOrganization(CreateOrganizationRequest request) {
         if (organizationRepository.existsBySlug(request.slug())) {
-            throw new IllegalArgumentException("An organization with this slug already exists");
+            throw new OrganizationSlugAlreadyExistsException(request.slug());
         }
 
         Organization organization = new Organization(
