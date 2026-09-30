@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.yran304.incidentplatform.organizations.OrganizationNotFoundException;
@@ -30,16 +31,6 @@ public class TrackedServiceService {
         if (!organizationRepository.existsById(organizationId)) {
             throw new OrganizationNotFoundException(organizationId);
         }
-        
-        if (trackedServiceRepository.existsByOrganizationIdAndSlug(
-            organizationId, 
-            request.slug())
-        ) {
-            throw new ServiceSlugAlreadyExistsException(
-                organizationId, 
-                request.slug()
-            );
-        }
 
         TrackedService service = new TrackedService(
             UUID.randomUUID(),
@@ -50,9 +41,15 @@ public class TrackedServiceService {
             Instant.now()
         );
 
-        TrackedService savedTrackedService = trackedServiceRepository.save(service);
-
-        return ServiceResponse.from(savedTrackedService);
+        try {
+            TrackedService savedTrackedService = trackedServiceRepository.saveAndFlush(service);
+            return ServiceResponse.from(savedTrackedService);
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceSlugAlreadyExistsException(
+                organizationId,
+                request.slug()
+            );
+        }
     }
 
     public List<ServiceResponse> getServicesByOrganization(UUID organizationId) {

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,10 +18,6 @@ public class OrganizationService { // higher-level business logic. It uses the r
     }
 
     public OrganizationResponse createOrganization(CreateOrganizationRequest request) {
-        if (organizationRepository.existsBySlug(request.slug())) {
-            throw new OrganizationSlugAlreadyExistsException(request.slug());
-        }
-
         Organization organization = new Organization(
             UUID.randomUUID(),
             request.name(), // we only need to provide these two when creating a new request.
@@ -28,11 +25,12 @@ public class OrganizationService { // higher-level business logic. It uses the r
             Instant.now()
         );
         // the step that writes the new row to the table
-        Organization savedOrganization = organizationRepository.save(organization);
-        // why we need to return response: Saving the row completes the database action, but the API still needs to tell the client what happened.
-        // Returning OrganizationResponse lets the frontend receive the newly created organization, such as its ID
-        // Without a response, the client would only know that the request ended, not which organization was created.
-        return OrganizationResponse.from(savedOrganization);
+        try {
+            Organization savedOrganization = organizationRepository.saveAndFlush(organization);
+            return OrganizationResponse.from(savedOrganization);
+        } catch (DataIntegrityViolationException e) {
+            throw new OrganizationSlugAlreadyExistsException(request.slug());
+        }
     }
 
     public List<OrganizationResponse> getOrganizations() {
