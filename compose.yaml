@@ -15,5 +15,23 @@ services: # what services do we run, Docker compose read this
       timeout: 5s
       retries: 10
 
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/incident_platform
+      SPRING_DATASOURCE_USERNAME: incident_app
+      SPRING_DATASOURCE_PASSWORD: incident_app_password
+    ports:
+      - "8080:8080"
+
 volumes: # where do we keep the data
   postgres-data:
