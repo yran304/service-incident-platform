@@ -4,8 +4,8 @@ A full-stack application that enables organizations to manage service incidents 
 
 ## Project status
 
-Foundation complete. The React frontend, Spring Boot backend, PostgreSQL database,
-and Flyway migrations run locally. Core product features are in development.
+Foundation complete. The backend and PostgreSQL now run via Docker Compose;
+the frontend still runs locally. Core product features are in development.
 
 ## Planned capabilities
 
@@ -21,7 +21,7 @@ and Flyway migrations run locally. Core product features are in development.
 - Frontend: React and TypeScript
 - Database: PostgreSQL with Flyway migrations
 - Security: Spring Security and JWT
-- Delivery: Docker Compose and GitHub Actions
+- Delivery: GitHub Actions (Docker Compose for backend + database is already in place)
 
 ## Architecture
 
@@ -35,20 +35,24 @@ React frontend → Spring Boot REST API → PostgreSQL
 - Node.js 20.19 or later
 - Docker Desktop
 
-Start PostgreSQL from the repository root:
+Start PostgreSQL and the backend from the repository root:
 
 ```bash
-docker compose up -d postgres
-```
-
-Start the backend in a second terminal:
-
-```bash
-cd backend
-./gradlew bootRun
+docker compose up --build
 ```
 
 The backend health endpoint is available at <http://localhost:8080/actuator/health>.
+
+### Alternative: run the backend outside Docker
+
+Useful when actively developing the backend and you want faster restarts without
+rebuilding the image each time.
+
+```bash
+docker compose up -d postgres
+cd backend
+./gradlew bootRun
+```
 
 Start the frontend in another terminal:
 
@@ -61,9 +65,13 @@ Open the URL printed by Vite, normally <http://localhost:5173>.
 
 ## Run backend tests
 
-PostgreSQL must be running first. Then run:
+Tests connect to a real local PostgreSQL instance on `localhost:5432`, not a
+containerized test database. The `postgres` service from Docker Compose works
+for this since its port is published to the host; the `backend` container does
+not need to be running.
 
 ```bash
+docker compose up -d postgres
 cd backend
 ./gradlew test
 ```
@@ -74,4 +82,4 @@ cd backend
 2. Core service and incident APIs.
 3. Authentication and role-based authorization.
 4. Internal dashboard and public status page.
-5. Tests, Docker Compose, CI, and API documentation.
+5. Tests, CI, and API documentation. Docker Compose for backend + database is done; frontend containerization is still pending.
