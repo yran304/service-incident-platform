@@ -10,6 +10,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yran304.incidentplatform.organizations.Organization;
@@ -18,12 +23,6 @@ import com.yran304.incidentplatform.services.TrackedService;
 import com.yran304.incidentplatform.services.TrackedServiceRepository;
 
 import tools.jackson.databind.ObjectMapper;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +43,9 @@ public class IncidentControllerIntegrationTests {
 
     @Autowired
     private IncidentRepository incidentRepository;
+
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @Test
     void createsIncident() throws Exception {
@@ -149,6 +151,31 @@ public class IncidentControllerIntegrationTests {
             .andExpect(jsonPath("$.title").value("Invalid incident status transition"));
     }
 
+    // updateIncidentStatus reads the current status, validates the transition, then writes
+    // back (check-then-act). Without a version check, two concurrent requests reading the
+    // same old status could both pass validation and the second write would silently
+    // overwrite the first (lost update) instead of failing. This test proves the @Version
+    // field on Incident actually stops that: a write based on a stale version must be
+    // rejected with 409, not silently accepted.
+    @Test
+    void returnsConflictWhenIncidentModifiedConcurrently() throws Exception {
+        Incident incident = createTestIncident();
+
+        // Bypass Hibernate and bump the version column directly in the database to
+        // simulate "another request already committed a change to this row." The Incident
+        // object above stays in this test's persistence context with the old version, so
+        // Hibernate has no idea the row moved on underneath it.
+        jdbcTemplate.update(
+            "UPDATE incidents SET version = version + 1 WHERE id = ?",
+            incident.getId()
+        );
+
+        updateIncidentStatus(incident.getId(), "IDENTIFIED")
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.title").value("Incident update conflict"));
+    }
+
     private TrackedService createTestService() {
         Organization organization = organizationRepository.save(
             new Organization(
@@ -175,7 +202,12 @@ public class IncidentControllerIntegrationTests {
         TrackedService trackedService = createTestService();
         Instant now = Instant.now();
 
-        return incidentRepository.save(
+        // saveAndFlush (not save) so the row actually exists in the database by the time
+        // this method returns. returnsConflictWhenIncidentModifiedConcurrently() updates
+        // this row directly via JDBC right after calling this method; with plain save(),
+        // the insert would still be pending and that JDBC update would silently match zero
+        // rows.
+        return incidentRepository.saveAndFlush(
             new Incident(
                 UUID.randomUUID(),
                 trackedService.getId(),
