@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "incidents")
@@ -35,6 +36,9 @@ public class Incident {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    @Version
+    private Long version;
 
     protected Incident() {}
 

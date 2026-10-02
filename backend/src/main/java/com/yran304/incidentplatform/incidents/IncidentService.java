@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.yran304.incidentplatform.services.TrackedServiceNotFoundException;
@@ -82,10 +83,12 @@ public class IncidentService {
         
         incident.updateStatus(request.status(), resolvedAt);
 
-        Incident savedIncident = incidentRepository.save(incident);
-
-        return IncidentResponse.from(savedIncident);
-        
+        try {
+            Incident savedIncident = incidentRepository.saveAndFlush(incident);
+            return IncidentResponse.from(savedIncident);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new IncidentUpdateConflictException(incidentId);
+        }
     }
 
     private boolean isValidStatusTransition(

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.yran304.incidentplatform.incidents.IncidentNotFoundException;
+import com.yran304.incidentplatform.incidents.IncidentUpdateConflictException;
 import com.yran304.incidentplatform.incidents.InvalidIncidentStatusTransitionException;
 import com.yran304.incidentplatform.organizations.OrganizationNotFoundException;
 import com.yran304.incidentplatform.organizations.OrganizationSlugAlreadyExistsException;
@@ -96,6 +97,20 @@ public class ApiExceptionHandler {
         );
 
         problem.setTitle("Invalid incident status transition");
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(IncidentUpdateConflictException.class)
+    public ResponseEntity<ProblemDetail> handleIncidentUpdateConflict(
+        IncidentUpdateConflictException exception
+    ) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            exception.getMessage()
+        );
+
+        problem.setTitle("Incident update conflict");
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
