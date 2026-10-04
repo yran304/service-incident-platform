@@ -13,11 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.yran304.incidentplatform.TestcontainersConfiguration;
 
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest // Starts the full Spring Boot application context for the test. Real Spring-managed components such as Controller, Service, Repository, JPA/Flyway configuration, and database connection can participate in the integration test.
+@Import(TestcontainersConfiguration.class)
 @AutoConfigureMockMvc // Configures MockMvc for the test, allowing us to simulate HTTP requests to Spring MVC endpoints without starting a real HTTP server. The requests still go through the real Controller and application layers.
 @Transactional // Runs each test inside a database transaction. Database changes made during the test are automatically rolled back afterward, preventing test data from affecting other tests.
 public class OrganizationControllerIntegrationTests {

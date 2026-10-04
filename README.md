@@ -65,13 +65,12 @@ Open the URL printed by Vite, normally <http://localhost:5173>.
 
 ## Run backend tests
 
-Tests connect to a real local PostgreSQL instance on `localhost:5432`, not a
-containerized test database. The `postgres` service from Docker Compose works
-for this since its port is published to the host; the `backend` container does
-not need to be running.
+Tests use [Testcontainers](https://testcontainers.com/) to start a disposable
+PostgreSQL container automatically; Docker must be running, but you do not
+need to start `docker compose` first. Each test run gets a fresh database and
+Flyway migrations are applied from scratch.
 
 ```bash
-docker compose up -d postgres
 cd backend
 ./gradlew test
 ```
