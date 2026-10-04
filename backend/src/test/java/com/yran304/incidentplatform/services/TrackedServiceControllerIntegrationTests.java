@@ -13,14 +13,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yran304.incidentplatform.TestcontainersConfiguration;
 import com.yran304.incidentplatform.organizations.Organization;
 import com.yran304.incidentplatform.organizations.OrganizationRepository;
 
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
+@Import(TestcontainersConfiguration.class)
 @AutoConfigureMockMvc
 @Transactional
 public class TrackedServiceControllerIntegrationTests {
