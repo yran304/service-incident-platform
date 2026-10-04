@@ -1,5 +1,7 @@
 # Service Incident & Status Management Platform
 
+[![Backend CI](https://github.com/yran304/service-incident-platform/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/yran304/service-incident-platform/actions/workflows/backend-ci.yml)
+
 A full-stack application that enables organizations to manage service incidents and publish customer-facing status updates from a secure internal dashboard.
 
 ## Project status
@@ -21,7 +23,7 @@ the frontend still runs locally. Core product features are in development.
 - Frontend: React and TypeScript
 - Database: PostgreSQL with Flyway migrations
 - Security: Spring Security and JWT
-- Delivery: GitHub Actions (Docker Compose for backend + database is already in place)
+- Delivery: Docker Compose for backend + database, GitHub Actions running backend tests on every push/PR to main
 
 ## Architecture
 
