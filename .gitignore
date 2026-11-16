@@ -5,6 +5,9 @@ Service_Incident_Platform_Project_Blueprint.docx
 ~$*
 
 # Local VS Code workspace settings
-.vscode/.DS_Store
+.vscode/
+
+# macOS Finder files
+.DS_Store
 PROJECT_SUMMARY.md
 ROADMAP.md
